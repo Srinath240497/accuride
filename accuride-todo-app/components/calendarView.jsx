@@ -9,15 +9,17 @@ export default function CalendarView({
   onSelectEvent,
   onSelectSlot,
   culture = "en",
+  date,
   view = "month",
   onChangeView,
   onNavigate
 }) {
   return (
-    <div className="mx-auto max-w-5xl mt-10">
+    <div className="mx-auto max-w-5xl mt-6">
       <Calendar
         localizer={localizer}
         events={events}
+        date={date}
         startAccessor="start"
         endAccessor="end"
         culture={culture}

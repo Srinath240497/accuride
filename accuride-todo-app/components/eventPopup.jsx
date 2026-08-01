@@ -22,13 +22,18 @@ export default function EventPopup({
       setDescription(event?.description || "");
       setCompleted(event?.completed || false);
 
-      const startData = event?.start || moment();
-      setStartDate(moment(startData)?.format("YYYY-MM-DDTHH:mm"));
-      const endData = event?.end || moment();
-      setEndDate(moment(endData)?.format("YYYY-MM-DDTHH:mm"));
+      const startData = event?.start || event?.startDate || moment();
+      const endData =
+        event?.end || event?.endDate || moment(startData).add(1, "hours");
+
+      setStartDate(moment(startData).format("YYYY-MM-DDTHH:mm"));
+      setEndDate(moment(endData).format("YYYY-MM-DDTHH:mm"));
     } else {
-      setStartDate(moment()?.format("YYYY-MM-DDTHH:mm"));
-      setEndDate(moment()?.format("YYYY-MM-DDTHH:mm"));
+      setTitle("");
+      setDescription("");
+      setCompleted(false);
+      setStartDate(moment().format("YYYY-MM-DDTHH:mm"));
+      setEndDate(moment().add(1, "hours").format("YYYY-MM-DDTHH:mm"));
     }
   }, [event, isOpen]);
 
@@ -37,12 +42,17 @@ export default function EventPopup({
   const handleSubmit = (e) => {
     e.preventDefault();
 
+    const startMoment = moment(startDate);
+    const endMoment = moment(endDate);
+
     onSave({
       id: event?.id,
       title,
       description,
-      start: momentDate.toDate(),
-      end: moment(momentDate).add(1, "hours").toDate(),
+      start: startMoment.toDate(),
+      end: endMoment.toDate(),
+      startDate: startMoment.toISOString(),
+      endDate: endMoment.toISOString(),
       completed,
     });
 
@@ -64,10 +74,10 @@ export default function EventPopup({
             <input
               type="text"
               required
-              value={event ? title : ''}
+              value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Title"
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              placeholder="Event Title"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800"
             />
           </div>
 
@@ -76,11 +86,11 @@ export default function EventPopup({
               Description
             </label>
             <textarea
-              value={event ? description : ''}
+              value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Description"
+              placeholder="Event details..."
               rows={3}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-800"
             />
           </div>
 
@@ -93,7 +103,7 @@ export default function EventPopup({
               required
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 bg-white"
             />
           </div>
 
@@ -106,11 +116,29 @@ export default function EventPopup({
               required
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 bg-white"
+              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-gray-700 bg-white"
             />
           </div>
 
-          <div className="flex justify-between items-center pt-4 border-t">
+          {event?.id && (
+            <div className="flex items-center gap-2 pt-1">
+              <input
+                type="checkbox"
+                id="completed"
+                checked={completed}
+                onChange={(e) => setCompleted(e.target.checked)}
+                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
+              />
+              <label
+                htmlFor="completed"
+                className="text-sm font-medium text-gray-700"
+              >
+                Mark as Completed
+              </label>
+            </div>
+          )}
+
+          <div className="flex justify-between items-center pt-4 border-t border-gray-100">
             {event?.id ? (
               <button
                 type="button"
@@ -118,7 +146,7 @@ export default function EventPopup({
                   onDelete(event.id);
                   onClose();
                 }}
-                className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 font-medium"
+                className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 font-medium transition-colors"
               >
                 Delete
               </button>
@@ -130,13 +158,13 @@ export default function EventPopup({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 font-medium"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors"
               >
                 Save
               </button>
