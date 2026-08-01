@@ -9,6 +9,9 @@ export default function CalendarView({
   onSelectEvent,
   onSelectSlot,
   culture = "en",
+  view = "month",
+  onChangeView,
+  onNavigate
 }) {
   return (
     <div className="mx-auto max-w-5xl mt-10">
@@ -22,6 +25,9 @@ export default function CalendarView({
         onSelectEvent={onSelectEvent}
         onSelectSlot={onSelectSlot}
         style={{ height: '77vh' }}
+        view={view}
+        onView={onChangeView}
+        onNavigate={onNavigate}
       />
     </div>
   );
