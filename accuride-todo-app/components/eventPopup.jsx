@@ -120,24 +120,6 @@ export default function EventPopup({
             />
           </div>
 
-          {event?.id && (
-            <div className="flex items-center gap-2 pt-1">
-              <input
-                type="checkbox"
-                id="completed"
-                checked={completed}
-                onChange={(e) => setCompleted(e.target.checked)}
-                className="w-4 h-4 text-blue-600 rounded border-gray-300 focus:ring-blue-500"
-              />
-              <label
-                htmlFor="completed"
-                className="text-sm font-medium text-gray-700"
-              >
-                Mark as Completed
-              </label>
-            </div>
-          )}
-
           <div className="flex justify-between items-center pt-4 border-t border-gray-100">
             {event?.id ? (
               <button

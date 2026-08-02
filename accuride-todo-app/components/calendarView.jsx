@@ -12,7 +12,8 @@ export default function CalendarView({
   date,
   view = "month",
   onChangeView,
-  onNavigate
+  onNavigate,
+  currentDate
 }) {
   return (
     <div className="mx-auto max-w-5xl mt-6">

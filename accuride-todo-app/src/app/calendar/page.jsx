@@ -1,17 +1,42 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import moment from "moment";
 import CalendarView from "../../../components/calendarView";
 import EventPopup from "../../../components/eventPopup";
-import { myEventsList } from "../../../constants/events";
 
 export default function CalendarPage() {
-  const [events, setEvents] = useState(myEventsList);
+  const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState("month");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  const fetchEvents = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("/api/todos?userId=1");
+      const data = await res.json();
+
+      if (Array.isArray(data)) {
+        const formattedEvents = data.map((todo) => ({
+          ...todo,
+          start: new Date(todo.startDate),
+          end: new Date(todo.endDate),
+        }));
+        setEvents(formattedEvents);
+      }
+    } catch (err) {
+      console.error("Failed to load events:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleNavigate = (newDate) => {
     setCurrentDate(newDate);
@@ -31,26 +56,56 @@ export default function CalendarPage() {
     setActiveEvent({
       start: selectedDate.toDate(),
       end: moment(selectedDate).add(1, "hours").toDate(),
-      dueDate: selectedDate.toISOString(),
+      startDate: selectedDate.toISOString(),
+      endDate: moment(selectedDate).add(1, "hours").toISOString(),
     });
     setIsModalOpen(true);
   };
 
-  const handleSaveEvent = (eventData) => {
-    if (eventData?.id) {
-      setEvents((prev) =>
-        prev.map((item) => (item.id === eventData?.id ? eventData : item))
-      );
-    } else {
-      const newEvent = { ...eventData, id: Date.now().toString() };
-      setEvents((prev) => [...prev, newEvent]);
+  const handleSaveEvent = async (eventData) => {
+    try {
+      if (eventData?.id) {
+        await fetch("/api/todos", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: eventData.id,
+            title: eventData.title,
+            description: eventData.description,
+            startDate: moment(eventData.startDate || eventData.start).toISOString(),
+            endDate: moment(eventData.endDate || eventData.end).toISOString(),
+            completed: eventData.completed || false,
+          }),
+        });
+      } else {
+        await fetch("/api/todos", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            title: eventData.title,
+            description: eventData.description,
+            startDate: moment(eventData.startDate || eventData.start).toISOString(),
+            endDate: moment(eventData.endDate || eventData.end).toISOString(),
+            userId: "1",
+          }),
+        });
+      }
+
+      setIsModalOpen(false);
+      fetchEvents();
+    } catch (err) {
+      console.error("Save failed:", err);
     }
-    setIsModalOpen(false);
   };
 
-  const handleDeleteEvent = (id) => {
-    setEvents((prev) => prev.filter((item) => item.id !== id));
-    setIsModalOpen(false);
+  const handleDeleteEvent = async (id) => {
+    try {
+      await fetch(`/api/todos?id=${id}`, { method: "DELETE" });
+      setIsModalOpen(false);
+      fetchEvents();
+    } catch (err) {
+      console.error("Delete failed:", err);
+    }
   };
 
   return (
@@ -70,16 +125,22 @@ export default function CalendarPage() {
         </button>
       </div>
 
-      <CalendarView
-        events={events}
-        culture="en"
-        date={currentDate}
-        view={currentView}
-        onSelectEvent={handleSelectEvent}
-        onSelectSlot={handleSelectSlot}
-        onChangeView={handleViewChange}
-        onNavigate={handleNavigate}
-      />
+      {loading ? (
+        <div className="flex justify-center items-center h-[500px] bg-white rounded-xl border border-gray-100 shadow-sm">
+          <p className="text-gray-500 font-medium">Loading events from Hygraph...</p>
+        </div>
+      ) : (
+        <CalendarView
+          events={events}
+          culture="en"
+          date={currentDate}
+          view={currentView}
+          onSelectEvent={handleSelectEvent}
+          onSelectSlot={handleSelectSlot}
+          onChangeView={handleViewChange}
+          onNavigate={handleNavigate}
+        />
+      )}
 
       <EventPopup
         isOpen={isModalOpen}
