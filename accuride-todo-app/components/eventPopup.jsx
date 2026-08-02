@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
 import moment from "moment";
 
 export default function EventPopup({
@@ -10,17 +11,18 @@ export default function EventPopup({
   onDelete,
   event,
 }) {
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
+
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [completed, setCompleted] = useState(false);
 
   useEffect(() => {
     if (event) {
       setTitle(event?.title || "");
       setDescription(event?.description || "");
-      setCompleted(event?.completed || false);
 
       const startData = event?.start || event?.startDate || moment();
       const endData =
@@ -31,7 +33,6 @@ export default function EventPopup({
     } else {
       setTitle("");
       setDescription("");
-      setCompleted(false);
       setStartDate(moment().format("YYYY-MM-DDTHH:mm"));
       setEndDate(moment().add(1, "hours").format("YYYY-MM-DDTHH:mm"));
     }
@@ -53,7 +54,7 @@ export default function EventPopup({
       end: endMoment.toDate(),
       startDate: startMoment.toISOString(),
       endDate: endMoment.toISOString(),
-      completed,
+      userId: userId,
     });
 
     onClose();

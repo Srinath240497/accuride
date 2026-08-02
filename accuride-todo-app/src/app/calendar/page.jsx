@@ -1,11 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
 import moment from "moment";
 import CalendarView from "../../../components/calendarView";
 import EventPopup from "../../../components/eventPopup";
+import LogoutButton from "../../../components/logout";
 
 export default function CalendarPage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
@@ -14,13 +19,15 @@ export default function CalendarPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (status === "unauthenticated") {
+      router.push("/login");
+    }
+  }, [status, router]);
 
   const fetchEvents = async () => {
     setLoading(true);
     try {
-      const res = await fetch("/api/todos?userId=1");
+      const res = await fetch("/api/todos");
       const data = await res.json();
 
       if (Array.isArray(data)) {
@@ -37,6 +44,22 @@ export default function CalendarPage() {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchEvents();
+  }, []);
+
+  if (status === "loading") {
+    return (
+      <div className="flex justify-center items-center min-h-screen text-gray-500 font-medium">
+        Loading session...
+      </div>
+    );
+  }
+
+  if (status === "unauthenticated") {
+    return null;
+  }
 
   const handleNavigate = (newDate) => {
     setCurrentDate(newDate);
@@ -63,48 +86,65 @@ export default function CalendarPage() {
   };
 
   const handleSaveEvent = async (eventData) => {
-    try {
-      if (eventData?.id) {
-        await fetch("/api/todos", {
+    if (eventData.id) {
+      setEvents((prevEvents) =>
+        prevEvents.map((evt) =>
+          evt.id === eventData.id ? { ...evt, ...eventData } : evt
+        )
+      );
+
+      try {
+        await fetch(`/api/todos?id=${eventData.id}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            id: eventData.id,
-            title: eventData.title,
-            description: eventData.description,
-            startDate: moment(eventData.startDate || eventData.start).toISOString(),
-            endDate: moment(eventData.endDate || eventData.end).toISOString(),
-            completed: eventData.completed || false,
-          }),
+          body: JSON.stringify(eventData),
         });
-      } else {
-        await fetch("/api/todos", {
+      } catch (err) {
+        console.error("Failed to update event:", err);
+      }
+    } else {
+      const tempId = "temp-" + Date.now();
+      const newOptimisticEvent = { ...eventData, id: tempId };
+
+      setEvents((prevEvents) => [...prevEvents, newOptimisticEvent]);
+
+      try {
+        const res = await fetch("/api/todos", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            title: eventData.title,
-            description: eventData.description,
-            startDate: moment(eventData.startDate || eventData.start).toISOString(),
-            endDate: moment(eventData.endDate || eventData.end).toISOString(),
-            userId: "1",
-          }),
+          body: JSON.stringify(eventData),
         });
-      }
+        const savedEvent = await res.json();
 
-      setIsModalOpen(false);
-      fetchEvents();
-    } catch (err) {
-      console.error("Save failed:", err);
+        setEvents((prevEvents) =>
+          prevEvents.map((evt) =>
+            evt.id === tempId
+              ? {
+                  ...savedEvent,
+                  start: new Date(savedEvent.startDate),
+                  end: new Date(savedEvent.endDate),
+                }
+              : evt
+          )
+        );
+      } catch (err) {
+        console.error("Failed to create event:", err);
+        setEvents((prevEvents) =>
+          prevEvents.filter((evt) => evt.id !== tempId)
+        );
+      }
     }
   };
 
-  const handleDeleteEvent = async (id) => {
+  const handleDeleteEvent = async (eventId) => {
+    setEvents((prevEvents) => prevEvents.filter((evt) => evt.id !== eventId));
     try {
-      await fetch(`/api/todos?id=${id}`, { method: "DELETE" });
-      setIsModalOpen(false);
-      fetchEvents();
+      await fetch(`/api/todos?id=${eventId}`, {
+        method: "DELETE",
+      });
     } catch (err) {
-      console.error("Delete failed:", err);
+      console.error("Failed to delete event:", err);
+      fetchEvents();
     }
   };
 
@@ -123,11 +163,14 @@ export default function CalendarPage() {
         >
           + Add Event
         </button>
+        <LogoutButton />
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-[500px] bg-white rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-gray-500 font-medium">Loading events from Hygraph...</p>
+          <p className="text-gray-500 font-medium">
+            Loading events from Hygraph...
+          </p>
         </div>
       ) : (
         <CalendarView
