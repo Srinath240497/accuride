@@ -14,23 +14,52 @@ pnpm dev
 bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Next.js Event Calendar & Todo Management System
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+A responsive Event Calendar web application built with Next.js 14 (App Router), NextAuth.js, React Big Calendar, and Hygraph (GraphQL CMS). 
 
-## Learn More
+The application provides user authentication, individual user event isolation, real-time optimistic UI updates.
 
-To learn more about Next.js, take a look at the following resources:
+--------------------------------------------------------------------------------------------------------------------------------------------
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## Features
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+User Authenticated: Multi-user support with NextAuth session management. Each user's calendar data and todo items are strictly isolated and queried securely via Hygraph GraphQL filters.
 
-## Deploy on Vercel
+Optimistic UI Updates: Instant calendar reflections on Event Create, Edit, and Delete operations without UI lag.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Interactive Calendar View: Powered by `react-big-calendar` with dynamic Month, Week, Day, and Agenda view modes, date navigation, and direct slot-click event creation.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+Accessible Modal System: Overlay event popup engineered using React Portals (`createPortal`) to guarantee robust z-index stacking and full-viewport access over complex calendar layouts.
+
+Modern Tailwind Styling: Clean, accessible UI components styled with Tailwind CSS.
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Tech Stack
+
+- Framework: Next.js 14 (App Router)
+- Authentication: NextAuth.js
+- GraphQL Client: `graphql-request`
+- Headless CMS / Database: Hygraph (GraphCMS)
+- Calendar UI: `react-big-calendar`, `moment.js`
+- Styling: Tailwind CSS
+- State Management: React Hooks (`useState`, `useEffect`, `useSession`, React Portals)
+
+
+--------------------------------------------------------------------------------------------------------------------------------------------
+
+
+## Demo Login Details
+
+For testing data isolation between users, log in with the following demo credentials:
+
+| Account | Username          | Password | User ID |
+| User 1  | user1@example.com | Test@123 | 1       |
+| User 2  | user2@example.com | Test@123 | 2       |
+
+Note: Events created while logged in as `user1@example.com` will not be visible when logged in as `user2@example.com`.
