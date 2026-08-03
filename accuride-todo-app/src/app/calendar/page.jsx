@@ -46,8 +46,10 @@ export default function CalendarPage() {
   };
 
   useEffect(() => {
-    fetchEvents();
-  }, []);
+    if (status === "authenticated") {
+      fetchEvents();
+    }
+  }, [status]);
 
   if (status === "loading") {
     return (
@@ -101,6 +103,7 @@ export default function CalendarPage() {
         });
       } catch (err) {
         console.error("Failed to update event:", err);
+        fetchEvents();
       }
     } else {
       const tempId = "temp-" + Date.now();
@@ -154,23 +157,23 @@ export default function CalendarPage() {
         <h1 className="text-2xl font-bold text-gray-800">
           Event Calendar View
         </h1>
-        <button
-          onClick={() => {
-            setActiveEvent(null);
-            setIsModalOpen(true);
-          }}
-          className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-colors"
-        >
-          + Add Event
-        </button>
-        <LogoutButton />
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              setActiveEvent(null);
+              setIsModalOpen(true);
+            }}
+            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-sm transition-colors cursor-pointer"
+          >
+            + Add Event
+          </button>
+          <LogoutButton />
+        </div>
       </div>
 
       {loading ? (
         <div className="flex justify-center items-center h-[500px] bg-white rounded-xl border border-gray-100 shadow-sm">
-          <p className="text-gray-500 font-medium">
-            Loading events from Hygraph...
-          </p>
+          <p className="text-gray-500 font-medium">Loading events...</p>
         </div>
       ) : (
         <CalendarView

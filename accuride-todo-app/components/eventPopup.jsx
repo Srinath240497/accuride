@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
 import moment from "moment";
 
@@ -18,6 +19,11 @@ export default function EventPopup({
   const [description, setDescription] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (event) {
@@ -38,7 +44,7 @@ export default function EventPopup({
     }
   }, [event, isOpen]);
 
-  if (!isOpen) return null;
+  if (!isOpen || !mounted) return null;
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -60,9 +66,31 @@ export default function EventPopup({
     onClose();
   };
 
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
-      <div className="bg-white w-full max-w-md p-6 rounded-2xl shadow-xl border border-gray-100">
+  const modalMarkup = (
+    <div 
+      style={{
+        position: "fixed",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: "rgba(0, 0, 0, 0.5)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 9999,
+      }}
+    >
+      <div 
+        style={{
+          backgroundColor: "#ffffff",
+          borderRadius: "8px",
+          padding: "20px",
+          width: "100%",
+          maxWidth: "400px",
+          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
+        }}
+      >
         <h2 className="text-xl font-bold text-gray-800 mb-4">
           {event?.id ? "Edit Event" : "New Event"}
         </h2>
@@ -129,7 +157,7 @@ export default function EventPopup({
                   onDelete(event.id);
                   onClose();
                 }}
-                className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 font-medium transition-colors"
+                className="px-3 py-1.5 bg-red-50 text-red-600 rounded-lg text-sm hover:bg-red-100 font-medium transition-colors cursor-pointer"
               >
                 Delete
               </button>
@@ -141,13 +169,13 @@ export default function EventPopup({
               <button
                 type="button"
                 onClick={onClose}
-                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors"
+                className="px-4 py-2 bg-gray-100 text-gray-700 rounded-lg text-sm hover:bg-gray-200 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors"
+                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm hover:bg-blue-700 font-medium transition-colors cursor-pointer"
               >
                 Save
               </button>
@@ -157,4 +185,6 @@ export default function EventPopup({
       </div>
     </div>
   );
+
+  return createPortal(modalMarkup, document.body);
 }
