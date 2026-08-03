@@ -1,7 +1,14 @@
+// src/app/api/auth/[...nextauth]/route.js
+
+// Import Libraties
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 
+/**
+ * Export Auth Options
+ */
 export const authOptions = {
+  // provider
   providers: [
     CredentialsProvider({
       name: "Email and Password",
@@ -43,6 +50,7 @@ export const authOptions = {
       },
     }),
   ],
+  // callbacks
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
@@ -57,13 +65,16 @@ export const authOptions = {
       return session;
     },
   },
+  // pages
   pages: {
     signIn: "/login",
     error: "/login",
   },
+  // secret
   secret: process.env.NEXTAUTH_SECRET,
 };
 
+// Initialise Handler
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

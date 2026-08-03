@@ -1,16 +1,30 @@
+// src/app/calendar/page.jsx
 "use client";
 
+// Import React Hooks
 import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
+
+// Import Library
 import moment from "moment";
+
+// Import Components
 import CalendarView from "../../../components/calendarView";
 import EventPopup from "../../../components/eventPopup";
 import LogoutButton from "../../../components/logout";
 
+/**
+ *
+ * Calendar Page
+ *
+ * @returns
+ */
 export default function CalendarPage() {
+  // Initialise React Hooks Variables
   const { data: session, status } = useSession();
   const router = useRouter();
+  // Initialise State
   const [events, setEvents] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeEvent, setActiveEvent] = useState(null);
@@ -18,12 +32,18 @@ export default function CalendarPage() {
   const [currentView, setCurrentView] = useState("month");
   const [loading, setLoading] = useState(true);
 
+  /**
+   * Use Effect
+   */
   useEffect(() => {
     if (status === "unauthenticated") {
       router.push("/login");
     }
   }, [status, router]);
 
+  /**
+   * Fetch Events
+   */
   const fetchEvents = async () => {
     setLoading(true);
     try {
@@ -45,6 +65,10 @@ export default function CalendarPage() {
     }
   };
 
+  /**
+   * Use Effect with Dependencies
+   * status
+   */
   useEffect(() => {
     if (status === "authenticated") {
       fetchEvents();
@@ -63,19 +87,35 @@ export default function CalendarPage() {
     return null;
   }
 
+  /**
+   *
+   * @param {newDate} newDate
+   */
   const handleNavigate = (newDate) => {
     setCurrentDate(newDate);
   };
 
+  /**
+   *
+   * @param {newView} newView
+   */
   const handleViewChange = (newView) => {
     setCurrentView(newView);
   };
 
+  /**
+   *
+   * @param {event} event
+   */
   const handleSelectEvent = (event) => {
     setActiveEvent(event);
     setIsModalOpen(true);
   };
 
+  /**
+   *
+   * @param {slotInfo} slotInfo
+   */
   const handleSelectSlot = (slotInfo) => {
     const selectedDate = moment(slotInfo.start);
     setActiveEvent({
@@ -87,6 +127,10 @@ export default function CalendarPage() {
     setIsModalOpen(true);
   };
 
+  /**
+   *
+   * @param {eventData} eventData
+   */
   const handleSaveEvent = async (eventData) => {
     if (eventData.id) {
       setEvents((prevEvents) =>
@@ -139,6 +183,10 @@ export default function CalendarPage() {
     }
   };
 
+  /**
+   *
+   * @param {eventId} eventId
+   */
   const handleDeleteEvent = async (eventId) => {
     setEvents((prevEvents) => prevEvents.filter((evt) => evt.id !== eventId));
     try {

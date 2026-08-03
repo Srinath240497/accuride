@@ -1,10 +1,19 @@
+// src/components/eventPopup.jsx
 "use client";
 
+// Import react hooks
 import { useState, useEffect } from "react";
 import { createPortal } from "react-dom";
 import { useSession } from "next-auth/react";
+
+// Import moment
 import moment from "moment";
 
+/**
+ *
+ * @param {isOpen, onClose, onSave, onDelete, event} param0
+ * @returns
+ */
 export default function EventPopup({
   isOpen,
   onClose,
@@ -12,6 +21,7 @@ export default function EventPopup({
   onDelete,
   event,
 }) {
+  // Initialise States
   const { data: session } = useSession();
   const userId = session?.user?.id;
 
@@ -21,10 +31,18 @@ export default function EventPopup({
   const [endDate, setEndDate] = useState("");
   const [mounted, setMounted] = useState(false);
 
+  /**
+   * Use Effect
+   */
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  /**
+   * Use Effect with Dependencies
+   * event
+   * isOpen
+   */
   useEffect(() => {
     if (event) {
       setTitle(event?.title || "");
@@ -46,6 +64,9 @@ export default function EventPopup({
 
   if (!isOpen || !mounted) return null;
 
+  /**
+   * Function Handle Submit
+   */
   const handleSubmit = (e) => {
     e.preventDefault();
 
@@ -66,8 +87,11 @@ export default function EventPopup({
     onClose();
   };
 
+  /**
+   * Initialise React Dom Portal
+   */
   const modalMarkup = (
-    <div 
+    <div
       style={{
         position: "fixed",
         top: 0,
@@ -81,7 +105,7 @@ export default function EventPopup({
         zIndex: 9999,
       }}
     >
-      <div 
+      <div
         style={{
           backgroundColor: "#ffffff",
           borderRadius: "8px",
@@ -186,5 +210,6 @@ export default function EventPopup({
     </div>
   );
 
+  // return component
   return createPortal(modalMarkup, document.body);
 }

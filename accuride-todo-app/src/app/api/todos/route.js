@@ -1,4 +1,10 @@
+// src/app/api/todos/route.js
+
+// Import Libraries
 import { NextResponse } from "next/server";
+import { getServerSession } from "next-auth";
+
+// Import Functions
 import {
   hygraphClient,
   GET_TODOS_QUERY,
@@ -6,9 +12,13 @@ import {
   UPDATE_TODO_MUTATION,
   DELETE_TODO_MUTATION,
 } from "../../../../helper/hygraph";
-import { getServerSession } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/route";
 
+/**
+ * 
+ * @param {request} request 
+ * @returns 
+ */
 export async function GET(request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -29,6 +39,11 @@ export async function GET(request) {
   }
 }
 
+/**
+ * 
+ * @param {request} request 
+ * @returns 
+ */
 export async function POST(request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -57,6 +72,11 @@ export async function POST(request) {
   }
 }
 
+/**
+ * 
+ * @param {request} request 
+ * @returns 
+ */
 export async function PUT(request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {
@@ -92,6 +112,11 @@ export async function PUT(request) {
   }
 }
 
+/**
+ * 
+ * @param {request} request 
+ * @returns 
+ */
 export async function DELETE(request) {
   const session = await getServerSession(authOptions);
   if (!session?.user?.id) {

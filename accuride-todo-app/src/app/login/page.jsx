@@ -1,9 +1,15 @@
+// src/app/login/page.jsx
 "use client";
 
+// Import React Hooks
 import { useState } from "react";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 
+/**
+ *
+ * @returns
+ */
 export default function LoginPage() {
   const [email, setEmail] = useState("user1@example.com");
   const [password, setPassword] = useState("Test@123");
@@ -11,6 +17,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
+  /**
+   *
+   * @param {e} e
+   */
   const handleLogin = async (e) => {
     e.preventDefault();
     setLoading(true);

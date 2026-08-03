@@ -1,17 +1,28 @@
 // src/components/LogoutButton.jsx
 "use client";
 
+// Import React Hooks
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 
+/**
+ *
+ * @param {className} param0
+ * @returns
+ */
 export default function LogoutButton({ className = "" }) {
+  // Initialise State
   const [isSigningOut, setIsSigningOut] = useState(false);
 
+  /**
+   * Function Handle Sign Out
+   */
   const handleSignOut = async () => {
     setIsSigningOut(true);
     await signOut({ callbackUrl: "/login" });
   };
 
+  // return component
   return (
     <button
       onClick={handleSignOut}

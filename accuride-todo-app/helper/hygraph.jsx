@@ -1,8 +1,15 @@
+// src/helper/authProvider.jsx
+
+// Import GraphQL library
 import { GraphQLClient, gql } from "graphql-request";
 
+// Initialise variables
 const endpoint = process.env.NEXT_PUBLIC_HYGRAPH_ENDPOINT || "";
 const token = process.env.HYGRAPH_TOKEN || "";
 
+/**
+ * Export Hygrapgh Client
+ */
 export const hygraphClient = new GraphQLClient(endpoint, {
   headers: {
     ...(token ? { authorization: `Bearer ${token}` } : {}),
@@ -10,6 +17,9 @@ export const hygraphClient = new GraphQLClient(endpoint, {
   },
 });
 
+/**
+ * Export Get Query
+ */
 export const GET_TODOS_QUERY = gql`
   query GetUserTodos($userId: String!) {
     todos(where: { userId: $userId }, orderBy: startDate_ASC) {
@@ -23,6 +33,9 @@ export const GET_TODOS_QUERY = gql`
   }
 `;
 
+/**
+ * Export Create Query
+ */
 export const CREATE_TODO_MUTATION = gql`
   mutation CreateTodo(
     $title: String!
@@ -53,6 +66,9 @@ export const CREATE_TODO_MUTATION = gql`
   }
 `;
 
+/**
+ * Export Update Query
+ */
 export const UPDATE_TODO_MUTATION = gql`
   mutation UpdateTodo(
     $id: ID!
@@ -79,6 +95,9 @@ export const UPDATE_TODO_MUTATION = gql`
   }
 `;
 
+/**
+ * Export Delete Query
+ */
 export const DELETE_TODO_MUTATION = gql`
   mutation DeleteTodo($id: ID!) {
     deleteTodo(where: { id: $id }) {
